@@ -1,0 +1,23 @@
+{
+  "name": "Timer",
+  "version": "1.0",
+  "description": "Timer and nothing else!",
+  "permissions": [
+    "storage",
+    "contextMenus"
+  ],
+  "browser_action": {},
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "manifest_version": 2,
+  "icons": {
+    "16": "clock.png",
+    "32": "clock.png",
+    "48": "clock.png",
+    "128": "clock.png"
+  }
+}
