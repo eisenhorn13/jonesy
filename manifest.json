@@ -1,12 +1,17 @@
 {
-  "name": "Timer",
+  "name": "Jonesy timer",
   "version": "1.0",
-  "description": "Timer and nothing else!",
+  "description": "Simple timer extension for Google Chrome",
   "permissions": [
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "notifications"
   ],
   "browser_action": {},
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "background": {
     "scripts": [
       "background.js"

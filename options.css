@@ -1,0 +1,16 @@
+body {
+    font-family: Roboto, system-ui, sans-serif;
+}
+
+.field {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.field .disabled {
+    color: grey;
+}
+
+.field .sub {
+    padding-left: 22px;
+}
