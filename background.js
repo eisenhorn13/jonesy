@@ -21,8 +21,6 @@ class Timer {
     tick() {
         this.timer++;
 
-        // console.log(this.timer);
-
         const newMinute = this.timer / 60;
 
         if (Number.isInteger(newMinute)) {
@@ -34,7 +32,7 @@ class Timer {
                 breaksNotify: true,
                 breaksSound: true
             }, (items) => {
-                if (items.breaksEnable && Number.isInteger(this.timer / items.breaksEvery)) {
+                if (items.breaksEnable && Number.isInteger(newMinute / items.breaksEvery)) {
                     if (items.breaksNotify) {
                         const opts = {
                             type: "basic",
