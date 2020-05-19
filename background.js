@@ -10,7 +10,10 @@ class Timer {
 
     start() {
         this.paused = false;
-        this.started = new Date();
+
+        if (this.started === null) {
+            this.started = new Date();
+        }
 
         chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"});
         chrome.browserAction.setBadgeText({text: this.getMinutes().toString()});
@@ -26,7 +29,7 @@ class Timer {
         if (Number.isInteger(newMinute)) {
             chrome.browserAction.setBadgeText({text: this.getMinutes().toString()});
 
-            chrome.storage.sync.get({
+            chrome.storage.local.get({
                 breaksEnable: false,
                 breaksEvery: 1,
                 breaksNotify: true,
@@ -69,7 +72,49 @@ class Timer {
 
         this.ended = new Date();
 
-        this.reset();
+        this.save(() => this.reset());
+    }
+
+    save(callback) {
+        chrome.storage.local.get({
+            statistics: null
+        }, (items) => {
+            let storedData;
+            if (items.statistics === null) {
+                storedData = {};
+            } else {
+                storedData = JSON.parse(items.statistics);
+            }
+            const mergedData = this.mergeCurrentTimerToStorageData(storedData);
+
+            chrome.storage.local.set({
+                statistics: JSON.stringify(mergedData)
+            }, function () {
+                callback();
+            });
+        });
+    }
+
+    mergeCurrentTimerToStorageData(storedData) {
+        const year = this.started.getFullYear();
+        const month = this.started.getMonth();
+        const date = this.started.getDate();
+
+        if (storedData[year] === undefined) {
+            storedData[year] = {};
+        }
+
+        if (storedData[year][month] === undefined) {
+            storedData[year][month] = {};
+        }
+
+        if (storedData[year][month][date] === undefined) {
+            storedData[year][month][date] = [];
+        }
+
+        storedData[year][month][date].push(this.toJSON());
+
+        return storedData;
     }
 
     reset() {

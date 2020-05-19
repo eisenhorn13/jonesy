@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Options</title>
+    <title>Jonesy options</title>
     <link href="options.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 
-<div class="field">
-    <label class="field">
-        <input id="breaksEnable" type="checkbox">
-        Enable breaks
-    </label>
+<span id="status"></span>
 
-    <div class="field sub">
-        Every <input id="breaksEvery" min="25" style="width: 30px" type="number" value="1"> minutes
+<div id="container">
+    <h1>Settings</h1>
+    <div class="field">
+        <label class="field">
+            <input id="breaksEnable" type="checkbox">
+            Enable breaks
+        </label>
+
+        <div class="field sub">
+            Every <input id="breaksEvery" min="25" style="width: 30px" type="number" value="1"> minutes
+        </div>
+
+        <label class="field sub">
+            <input id="breaksNotify" type="checkbox">
+            Show notification
+        </label>
+
+        <label class="field sub">
+            <input id="breaksSound" type="checkbox">
+            Play a sound
+        </label>
     </div>
 
-    <label class="field sub">
-        <input id="breaksNotify" type="checkbox">
-        Show notification
-    </label>
+    <p style="text-align: right">
+        <button id="save">Save</button>
+    </p>
 
-    <label class="field sub">
-        <input id="breaksSound" type="checkbox">
-        Play a sound
-    </label>
+    <h1>Statistics</h1>
+    <div id="statistics"></div>
+
+    <h1>Danger zone</h1>
+    <button id="clearData">Clear data</button>
 </div>
-
-<p style="text-align: right">
-    <span id="status" style="color: green"></span>
-    <button id="save">Save</button>
-</p>
 
 <script src="options.js"></script>
 </body>

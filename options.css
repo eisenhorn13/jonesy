@@ -2,6 +2,25 @@ body {
     font-family: Roboto, system-ui, sans-serif;
 }
 
+#container {
+    width: 600px;
+    margin: 0 auto;
+}
+
+h1 {
+    border-bottom: solid 1px grey;
+}
+
+#status {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: mediumseagreen;
+    padding: 15px;
+    color: white;
+    display: none;
+}
+
 .field {
     display: block;
     margin-bottom: 10px;

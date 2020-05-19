@@ -1,6 +1,43 @@
 document.addEventListener('DOMContentLoaded', restoreOptions);
 document.getElementById('save').addEventListener('click', saveOptions);
+document.getElementById('clearData').addEventListener('click', clearData);
 document.getElementById('breaksEnable').addEventListener('click', toggleSubsEnabled);
+
+loadStatistics();
+
+function loadStatistics() {
+    const container = document.getElementById('statistics');
+
+    chrome.storage.local.get({
+        statistics: null
+    }, (items) => {
+        const statisticsRaw = items.statistics;
+
+        if (!statisticsRaw) {
+            container.textContent = 'No data';
+        } else {
+            const statistics = JSON.parse(statisticsRaw);
+
+            Object.keys(statistics).map(function (year) {
+                container.insertAdjacentHTML("beforeend", "<p>" + year + "</p>");
+
+                Object.keys(statistics[year]).map(function (month) {
+                    container.insertAdjacentHTML("beforeend", "<p>" + (parseInt(month, 10) + 1) + "</p>");
+
+                    Object.keys(statistics[year][month]).map(function (day) {
+                        let seconds = 0;
+                        statistics[year][month][day].forEach(function (data) {
+                            seconds += data.seconds;
+                        });
+
+                        container.insertAdjacentHTML("beforeend", "<p>" + day + " / entries: " + statistics[year][month][day].length + " / min: " + Math.ceil(seconds / 60) + "</p>");
+                    });
+                });
+            });
+        }
+    });
+
+}
 
 function toggleSubsEnabled() {
     const checkbox = document.getElementById('breaksEnable');
@@ -28,7 +65,7 @@ function toggleSubsEnabled() {
 }
 
 function restoreOptions() {
-    chrome.storage.sync.get({
+    chrome.storage.local.get({
         breaksEnable: false,
         breaksEvery: 1,
         breaksNotify: true,
@@ -49,17 +86,30 @@ function saveOptions() {
     const breaksNotify = document.getElementById('breaksNotify').checked;
     const breaksSound = document.getElementById('breaksSound').checked;
 
-    chrome.storage.sync.set({
+    chrome.storage.local.set({
         breaksEnable: breaksEnable,
         breaksEvery: parseInt(breaksEvery),
         breaksNotify: breaksNotify,
         breaksSound: breaksSound
     }, function () {
-        const status = document.getElementById('status');
-        status.textContent = 'Options saved.';
-
-        setTimeout(function () {
-            status.textContent = '';
-        }, 750);
+        showStatus('Options saved.');
     });
+}
+
+function clearData() {
+    chrome.storage.local.remove("statistics", function () {
+        showStatus('Data cleared.');
+        loadStatistics();
+    });
+}
+
+function showStatus(text) {
+    const status = document.getElementById('status');
+    status.textContent = text;
+    status.style.display = 'block';
+
+    setTimeout(function () {
+        status.textContent = '';
+        status.style.display = 'none';
+    }, 1000);
 }
