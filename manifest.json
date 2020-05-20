@@ -11,16 +11,16 @@
   "browser_action": {},
   "options_page": "options.html",
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": true
+    "page": "background.html"
   },
+  "web_accessible_resources": [
+    "Timer.js"
+  ],
   "manifest_version": 2,
   "icons": {
-    "16": "clock.png",
-    "32": "clock.png",
-    "48": "clock.png",
-    "128": "clock.png"
+    "16": "assets/images/clock.png",
+    "32": "assets/images/clock.png",
+    "48": "assets/images/clock.png",
+    "128": "assets/images/clock.png"
   }
 }

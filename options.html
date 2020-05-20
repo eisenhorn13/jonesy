@@ -17,7 +17,7 @@
         </label>
 
         <div class="field sub">
-            Every <input id="breaksEvery" min="25" style="width: 30px" type="number" value="1"> minutes
+            Every <input id="breaksEvery" min="25" type="number" value="1"> minutes
         </div>
 
         <label class="field sub">
@@ -38,10 +38,12 @@
     <h1>Statistics</h1>
     <div id="statistics"></div>
 
-    <h1>Danger zone</h1>
-    <button id="clearData">Clear data</button>
+    <textarea cols="30" id="statisticsRaw" rows="10"></textarea>
+
+    <button id="exportStatistics">Export</button>
+    <button id="clearStatistics">Clear statistics</button>
 </div>
 
-<script src="options.js"></script>
+<script src="options.js" type="module"></script>
 </body>
 </html>

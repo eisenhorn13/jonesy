@@ -1,42 +1,25 @@
-document.addEventListener('DOMContentLoaded', restoreOptions);
+import Statistics from "./Statistics.js";
+import Settings from "./Settings.js";
+
+let settings;
+
+document.addEventListener('DOMContentLoaded', run);
 document.getElementById('save').addEventListener('click', saveOptions);
-document.getElementById('clearData').addEventListener('click', clearData);
+document.getElementById('clearStatistics').addEventListener('click', clearStatistics);
+document.getElementById('exportStatistics').addEventListener('click', exportStatistics);
 document.getElementById('breaksEnable').addEventListener('click', toggleSubsEnabled);
 
-loadStatistics();
+async function run() {
+    settings = await Settings.syncFromStorage();
 
-function loadStatistics() {
-    const container = document.getElementById('statistics');
+    document.getElementById('breaksEnable').checked = settings.breaksEnable;
+    document.getElementById('breaksEvery').value = settings.breaksEvery;
+    document.getElementById('breaksNotify').checked = settings.breaksNotify;
+    document.getElementById('breaksSound').checked = settings.breaksSound;
 
-    chrome.storage.local.get({
-        statistics: null
-    }, (items) => {
-        const statisticsRaw = items.statistics;
+    toggleSubsEnabled();
 
-        if (!statisticsRaw) {
-            container.textContent = 'No data';
-        } else {
-            const statistics = JSON.parse(statisticsRaw);
-
-            Object.keys(statistics).map(function (year) {
-                container.insertAdjacentHTML("beforeend", "<p>" + year + "</p>");
-
-                Object.keys(statistics[year]).map(function (month) {
-                    container.insertAdjacentHTML("beforeend", "<p>" + (parseInt(month, 10) + 1) + "</p>");
-
-                    Object.keys(statistics[year][month]).map(function (day) {
-                        let seconds = 0;
-                        statistics[year][month][day].forEach(function (data) {
-                            seconds += data.seconds;
-                        });
-
-                        container.insertAdjacentHTML("beforeend", "<p>" + day + " / entries: " + statistics[year][month][day].length + " / min: " + Math.ceil(seconds / 60) + "</p>");
-                    });
-                });
-            });
-        }
-    });
-
+    await updateStatistics();
 }
 
 function toggleSubsEnabled() {
@@ -64,22 +47,6 @@ function toggleSubsEnabled() {
     }
 }
 
-function restoreOptions() {
-    chrome.storage.local.get({
-        breaksEnable: false,
-        breaksEvery: 1,
-        breaksNotify: true,
-        breaksSound: true
-    }, function (items) {
-        document.getElementById('breaksEnable').checked = items.breaksEnable;
-        document.getElementById('breaksEvery').value = items.breaksEvery;
-        document.getElementById('breaksNotify').checked = items.breaksNotify;
-        document.getElementById('breaksSound').checked = items.breaksSound;
-
-        toggleSubsEnabled();
-    });
-}
-
 function saveOptions() {
     const breaksEnable = document.getElementById('breaksEnable').checked;
     const breaksEvery = document.getElementById('breaksEvery').value;
@@ -96,11 +63,28 @@ function saveOptions() {
     });
 }
 
-function clearData() {
-    chrome.storage.local.remove("statistics", function () {
-        showStatus('Data cleared.');
-        loadStatistics();
-    });
+async function clearStatistics() {
+    let statistics = await Statistics.syncFromStorage()
+    statistics.clear()
+        .finally(() => {
+            updateStatistics();
+        });
+}
+
+async function updateStatistics() {
+    let statistics = await Statistics.syncFromStorage();
+    let container = document.getElementById('statistics');
+
+    container.innerHTML = "";
+    container.appendChild(statistics.report());
+}
+
+async function exportStatistics() {
+    let container = document.getElementById('statisticsRaw');
+    let statistics = await Statistics.syncFromStorage();
+
+    container.value = statistics.export();
+    container.style.display = "block";
 }
 
 function showStatus(text) {
