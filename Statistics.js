@@ -1,113 +1,111 @@
 class Statistics {
     /**
      *
-     * @param {null|Object} data
+     * @param {Array.<Object>} data
      */
     constructor(data) {
         /**
          *
-         * @type {null|Object}
+         * @type {Array.<Object>}
          */
-        this.data = data;
+        this.data = data
     }
 
-    static async syncFromStorage() {
-        return new Promise((resolve) => {
+    /**
+     *
+     * @param {Array.<Object>} json
+     */
+    static fromJSON(json) {
+        json = json.map(entry => ({
+            duration: Number(entry.duration),
+            started: new Date(entry.started),
+            ended: new Date(entry.ended)
+        }))
+
+        return new this(json)
+    }
+
+    /**
+     *
+     * @return {Promise<Statistics|boolean>}
+     */
+    static async createFromStorageData() {
+        return new Promise((resolve, reject) => {
             chrome.storage.local.get({
-                statistics: null
+                statistics: "[]"
             }, (items) => {
-                if (items.statistics) {
-                    const json = JSON.parse(items.statistics);
-
-                    if (json) {
-                        resolve(new this(json));
-                        return;
-                    }
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message)
+                    reject(false)
+                } else {
+                    const json = JSON.parse(items.statistics)
+                    resolve(this.fromJSON(json))
                 }
+            })
+        })
+    }
 
-                resolve(new this(null));
-            });
-        });
+    /**
+     *
+     * @return {Object}
+     */
+    toJSON() {
+        return JSON.stringify(this.data)
+    }
+
+    /**
+     *
+     * @return {Promise<boolean>}
+     */
+    async clear() {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.remove("statistics", () => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message)
+                    reject(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
     }
 
     /**
      *
      * @param {Timer} timer
-     * @return {*}
      */
     add(timer) {
-        const year = timer.started.getFullYear();
-        const month = timer.started.getMonth();
-        const date = timer.started.getDate();
-
-        if (this.data === null) {
-            this.data = {};
+        const data = {
+            duration: timer.duration,
+            started: timer.started,
+            ended: timer.ended
         }
 
-        if (this.data[year] === undefined) {
-            this.data[year] = {};
-        }
-
-        if (this.data[year][month] === undefined) {
-            this.data[year][month] = {};
-        }
-
-        if (this.data[year][month][date] === undefined) {
-            this.data[year][month][date] = [];
-        }
-
-        this.data[year][month][date].push(timer.toJSON());
-
-        this.syncToStorage();
+        this.data.push(data)
     }
 
-    syncToStorage() {
-        if (!this.data) return;
+    /**
+     *
+     * @return {Promise<boolean>}
+     */
+    save() {
+        return new Promise((resolve, reject) => {
+            if (!this.data) {
+                return resolve(true)
+            }
 
-        chrome.storage.local.set({
-            statistics: this.export()
-        });
-    }
-
-    import() {
-    }
-
-    export() {
-        return JSON.stringify(this.data);
-    }
-
-    report() {
-        let container = document.createElement("div");
-
-        if (!this.data) return container;
-
-        Object.keys(this.data).map((year) => {
-            container.insertAdjacentHTML("beforeend", "<p>" + year + "</p>");
-
-            Object.keys(this.data[year]).map((month) => {
-                container.insertAdjacentHTML("beforeend", "<p>" + (parseInt(month, 10) + 1) + "</p>");
-
-                Object.keys(this.data[year][month]).map((day) => {
-                    let seconds = 0;
-                    this.data[year][month][day].forEach((data) => {
-                        seconds += data.seconds;
-                    });
-
-                    container.insertAdjacentHTML("beforeend", "<p>" + day + " / entries: " + this.data[year][month][day].length + " / min: " + Math.ceil(seconds / 60) + "</p>");
-                });
-            });
-        });
-
-        return container;
-    }
-
-    async clear() {
-        return new Promise((resolve) => {
-            chrome.storage.local.remove("statistics", () => {
-                resolve();
-            });
-        });
+            chrome.storage.local.set({
+                statistics: this.toJSON()
+            }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message)
+                    reject(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
     }
 }
 
-export default Statistics;
+export default Statistics

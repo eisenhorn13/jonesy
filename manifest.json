@@ -8,6 +8,7 @@
     "notifications",
     "unlimitedStorage"
   ],
+  "content_security_policy": "script-src 'self' https://cdnjs.cloudflare.com; object-src 'self'",
   "browser_action": {},
   "options_page": "options.html",
   "background": {
@@ -18,9 +19,8 @@
   ],
   "manifest_version": 2,
   "icons": {
-    "16": "assets/images/clock.png",
-    "32": "assets/images/clock.png",
-    "48": "assets/images/clock.png",
-    "128": "assets/images/clock.png"
+    "16": "assets/images/clock-16x16.png",
+    "48": "assets/images/clock-48x48.png",
+    "128": "assets/images/clock-128x128.png"
   }
 }

@@ -38,13 +38,6 @@ button {
     cursor: pointer;
 }
 
-#statisticsRaw {
-    display: block;
-    width: 100%;
-    margin-bottom: 20px;
-    display: none;
-}
-
 #breaksEvery {
     width: 40px
 }

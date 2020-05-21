@@ -1,107 +1,116 @@
-import Timer from "./Timer.js";
-import Statistics from "./Statistics.js";
-import Settings from "./Settings.js";
+import {Timer, TimerStates} from "./Timer.js"
+import Statistics from "./Statistics.js"
+import Settings from "./Settings.js"
 
+/**
+ * @type Timer
+ */
 async function run() {
-    let timer = new Timer(await Settings.syncFromStorage());
+    let timer = new Timer(await Settings.createFromStorageData())
 
-    chrome.contextMenus.create({
-        title: "Start timer",
-        contexts: ["browser_action"],
-        onclick: startTimer
-    });
+    updateMenu()
+    updateBadge()
 
-    chrome.browserAction.onClicked.addListener(function () {
-        if (timer.interval) {
-            if (timer.paused) {
-                startTimer();
-            } else {
-                pauseTimer();
-            }
-        } else {
-            startTimer();
+    chrome.browserAction.onClicked.addListener(() => {
+        switch (timer.state) {
+            case TimerStates.Stopped:
+                startTimer()
+                break
+            case TimerStates.Running:
+                pauseTimer()
+                break
+            case TimerStates.Paused:
+                resumeTimer()
+                break
         }
-    });
+    })
 
-    function startTimer() {
-        timer.start();
+    function updateMenu() {
+        chrome.contextMenus.removeAll()
 
-        chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"});
-        chrome.browserAction.setBadgeText({text: timer.getMinutes().toString()});
+        switch (timer.state) {
+            case TimerStates.Stopped:
+                chrome.contextMenus.create({
+                    title: "Start timer",
+                    contexts: ["browser_action"],
+                    onclick: startTimer
+                })
+                break
+            case TimerStates.Running:
+                chrome.contextMenus.create({
+                    title: "Pause timer",
+                    contexts: ["browser_action"],
+                    onclick: pauseTimer
+                })
 
-        chrome.contextMenus.removeAll();
+                chrome.contextMenus.create({
+                    title: "Stop timer",
+                    contexts: ["browser_action"],
+                    onclick: stopTimer
+                })
+                break
+            case TimerStates.Paused:
+                chrome.contextMenus.create({
+                    title: "Resume timer",
+                    contexts: ["browser_action"],
+                    onclick: resumeTimer
+                })
 
-        chrome.contextMenus.create({
-            title: "Pause timer",
-            contexts: ["browser_action"],
-            onclick: pauseTimer
-        });
-
-        chrome.contextMenus.create({
-            title: "Stop timer",
-            contexts: ["browser_action"],
-            onclick: stopTimer
-        });
+                chrome.contextMenus.create({
+                    title: "Stop timer",
+                    contexts: ["browser_action"],
+                    onclick: stopTimer
+                })
+                break
+        }
     }
 
-    function pauseTimer() {
-        timer.pause();
+    function updateBadge() {
+        switch (timer.state) {
+            case TimerStates.Stopped:
+                chrome.browserAction.setBadgeText({text: ""})
+                break
+            case TimerStates.Running:
+                chrome.browserAction.setTitle({title: ""});
+                chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"})
+                chrome.browserAction.setBadgeText({text: timer.getDurationInMinutes()})
+                break
+            case TimerStates.Paused:
+                chrome.browserAction.setBadgeBackgroundColor({color: "#d1d1d1"})
+                break
+        }
+    }
 
-        chrome.browserAction.setBadgeBackgroundColor({color: "#d1d1d1"});
-
-        chrome.contextMenus.removeAll();
-
-        chrome.contextMenus.create({
-            title: "Resume timer",
-            contexts: ["browser_action"],
-            onclick: resumeTimer
-        });
-
-        chrome.contextMenus.create({
-            title: "Stop timer",
-            contexts: ["browser_action"],
-            onclick: stopTimer
-        });
+    async function startTimer() {
+        timer.start()
+        updateMenu()
+        updateBadge()
     }
 
     function resumeTimer() {
-        timer.start();
+        timer.resume()
+        updateMenu()
+        updateBadge()
+    }
 
-        chrome.contextMenus.removeAll();
-
-        chrome.contextMenus.create({
-            title: "Pause timer",
-            contexts: ["browser_action"],
-            onclick: pauseTimer
-        });
-
-        chrome.contextMenus.create({
-            title: "Stop timer",
-            contexts: ["browser_action"],
-            onclick: stopTimer
-        });
+    function pauseTimer() {
+        timer.pause()
+        updateMenu()
+        updateBadge()
     }
 
     async function stopTimer() {
-        timer.stop();
+        timer.stop()
 
-        let statistics = await Statistics.syncFromStorage();
-        statistics.add(timer);
+        let statistics = await Statistics.createFromStorageData()
+        statistics.add(timer)
+        await statistics.save()
 
-        timer.reset();
+        timer = new Timer(await Settings.createFromStorageData())
 
-        chrome.browserAction.setBadgeText({text: ""});
-
-        chrome.contextMenus.removeAll();
-
-        chrome.contextMenus.create({
-            title: "Start timer",
-            contexts: ["browser_action"],
-            onclick: startTimer
-        });
+        updateMenu()
+        updateBadge()
     }
 }
 
-run().catch(function (error) {
-    console.error(error);
-});
+run()
