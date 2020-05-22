@@ -2,9 +2,6 @@ import {ObservableEvents, Timer, TimerStates} from "./Timer.js"
 import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
 
-/**
- * @type Timer
- */
 async function run() {
     let settings = await Settings.createFromStorageData()
 
@@ -59,7 +56,6 @@ async function run() {
         broadcastTimer.stop()
 
         let statistics = await Statistics.createFromStorageData()
-        console.log(statistics, broadcastTimer)
         statistics.add(broadcastTimer.export())
         await statistics.save()
 
@@ -99,7 +95,6 @@ async function run() {
      * @param {Timer} broadcastTimer
      */
     function notify(broadcastTimer) {
-        console.log(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)
         if (
             settings.breaksEnable &&
             Number.isInteger(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)

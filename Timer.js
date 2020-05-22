@@ -121,8 +121,6 @@ class Timer {
     tick() {
         this.#duration++
 
-        console.log(this.#duration)
-
         if (Number.isInteger(this.#duration / 60)) {
             this.broadcast(ObservableEvents.NewMinute);
         }
