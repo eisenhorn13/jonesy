@@ -1,14 +1,14 @@
-import {ObservableEvents, Timer, TimerStates} from "./Timer.js"
+import {Timer, TimerStates} from "./Timer.js"
 import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
 
 async function run() {
     let timer = new Timer()
-    timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateMenu(broadcastTimer))
-    timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateBadge(broadcastTimer))
-    timer.subscribe(ObservableEvents.NewMinute, (broadcastTimer) => updateBadge(broadcastTimer))
-    timer.subscribe(ObservableEvents.NewMinute, (broadcastTimer) => notify(broadcastTimer))
-    timer.broadcast(ObservableEvents.StateChanged)
+    timer.subscribe("StateChanged", (broadcastTimer) => updateMenu(broadcastTimer))
+    timer.subscribe("StateChanged", (broadcastTimer) => updateBadge(broadcastTimer))
+    timer.subscribe("NewMinute", (broadcastTimer) => updateBadge(broadcastTimer))
+    timer.subscribe("NewMinute", (broadcastTimer) => notify(broadcastTimer))
+    timer.broadcast("StateChanged")
 
     chrome.browserAction.onClicked.addListener(() => {
         switch (timer.getState()) {
