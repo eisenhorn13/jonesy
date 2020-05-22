@@ -1,4 +1,4 @@
-import {Timer, TimerStates} from "./Timer.js"
+import {ObservableEvents, Timer, TimerStates} from "./Timer.js"
 import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
 
@@ -6,74 +6,87 @@ import Settings from "./Settings.js"
  * @type Timer
  */
 async function run() {
-    let timer = new Timer(await Settings.createFromStorageData())
+    let settings = await Settings.createFromStorageData()
 
-    updateMenu()
-    updateBadge()
+    let timer = new Timer()
+    timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateMenu(broadcastTimer))
+    timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateBadge(broadcastTimer))
+    timer.subscribe(ObservableEvents.NewMinute, (broadcastTimer) => updateBadge(broadcastTimer))
+    timer.subscribe(ObservableEvents.NewMinute, (broadcastTimer) => notify(broadcastTimer))
+    timer.broadcast(ObservableEvents.StateChanged)
 
     chrome.browserAction.onClicked.addListener(() => {
-        switch (timer.state) {
+        switch (timer.getState()) {
             case TimerStates.Stopped:
-                startTimer()
+                timer.start()
                 break
             case TimerStates.Running:
-                pauseTimer()
+                timer.pause()
                 break
             case TimerStates.Paused:
-                resumeTimer()
+                timer.resume()
                 break
         }
     })
 
-    function updateMenu() {
+    /**
+     *
+     * @param {Timer} broadcastTimer
+     */
+    function updateMenu(broadcastTimer) {
         chrome.contextMenus.removeAll()
 
-        switch (timer.state) {
+        switch (broadcastTimer.getState()) {
             case TimerStates.Stopped:
-                chrome.contextMenus.create({
-                    title: "Start timer",
-                    contexts: ["browser_action"],
-                    onclick: startTimer
-                })
+                createMenuItem("Start timer", () => broadcastTimer.start())
                 break
             case TimerStates.Running:
-                chrome.contextMenus.create({
-                    title: "Pause timer",
-                    contexts: ["browser_action"],
-                    onclick: pauseTimer
-                })
-
-                chrome.contextMenus.create({
-                    title: "Stop timer",
-                    contexts: ["browser_action"],
-                    onclick: stopTimer
-                })
+                createMenuItem("Pause timer", () => broadcastTimer.pause())
+                createMenuItem("Stop timer", async () => stopTimer(broadcastTimer))
                 break
             case TimerStates.Paused:
-                chrome.contextMenus.create({
-                    title: "Resume timer",
-                    contexts: ["browser_action"],
-                    onclick: resumeTimer
-                })
-
-                chrome.contextMenus.create({
-                    title: "Stop timer",
-                    contexts: ["browser_action"],
-                    onclick: stopTimer
-                })
-                break
+                createMenuItem("Resume timer", () => broadcastTimer.resume())
+                createMenuItem("Stop timer", async () => stopTimer(broadcastTimer))
         }
     }
 
-    function updateBadge() {
-        switch (timer.state) {
+    /**
+     *
+     * @param {Timer} broadcastTimer
+     * @return {Promise<void>}
+     */
+    async function stopTimer(broadcastTimer) {
+        broadcastTimer.stop()
+
+        let statistics = await Statistics.createFromStorageData()
+        console.log(statistics, broadcastTimer)
+        statistics.add(broadcastTimer.export())
+        await statistics.save()
+
+        broadcastTimer.reset()
+    }
+
+    function createMenuItem(title, fn) {
+        chrome.contextMenus.create({
+            title: title,
+            contexts: ["browser_action"],
+            onclick: fn
+        })
+    }
+
+    /**
+     *
+     * @param {Timer} broadcastTimer
+     */
+    function updateBadge(broadcastTimer) {
+        switch (broadcastTimer.getState()) {
             case TimerStates.Stopped:
                 chrome.browserAction.setBadgeText({text: ""})
                 break
             case TimerStates.Running:
                 chrome.browserAction.setTitle({title: ""});
                 chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"})
-                chrome.browserAction.setBadgeText({text: timer.getDurationInMinutes()})
+                chrome.browserAction.setBadgeText({text: broadcastTimer.getDurationInMinutes().toString()})
                 break
             case TimerStates.Paused:
                 chrome.browserAction.setBadgeBackgroundColor({color: "#d1d1d1"})
@@ -81,35 +94,34 @@ async function run() {
         }
     }
 
-    async function startTimer() {
-        timer.start()
-        updateMenu()
-        updateBadge()
-    }
+    /**
+     *
+     * @param {Timer} broadcastTimer
+     */
+    function notify(broadcastTimer) {
+        console.log(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)
+        if (
+            settings.breaksEnable &&
+            Number.isInteger(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)
+        ) {
+            if (settings.breaksNotify) {
+                const opts = {
+                    type: "basic",
+                    iconUrl: chrome.extension.getURL("/assets/images/clock-128x128.png"),
+                    title: "Jonesy timer",
+                    message: settings.breaksEvery + " minutes passed. It`s time to take a break."
+                }
 
-    function resumeTimer() {
-        timer.resume()
-        updateMenu()
-        updateBadge()
-    }
+                chrome.notifications.create("", opts)
+            }
 
-    function pauseTimer() {
-        timer.pause()
-        updateMenu()
-        updateBadge()
-    }
-
-    async function stopTimer() {
-        timer.stop()
-
-        let statistics = await Statistics.createFromStorageData()
-        statistics.add(timer)
-        await statistics.save()
-
-        timer = new Timer(await Settings.createFromStorageData())
-
-        updateMenu()
-        updateBadge()
+            if (settings.breaksSound) {
+                const sound = new Audio(chrome.runtime.getURL("/assets/sounds/sound.mp3"))
+                sound.play().catch(function (error) {
+                    console.error(error)
+                })
+            }
+        }
     }
 }
 

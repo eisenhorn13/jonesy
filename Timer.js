@@ -1,5 +1,3 @@
-import Settings from "./Settings.js"
-
 const TimerStates = {
     Stopped: 0,
     Running: 1,
@@ -7,108 +5,140 @@ const TimerStates = {
 }
 Object.freeze(TimerStates);
 
+const ObservableEvents = {
+    StateChanged: 0,
+    NewMinute: 1
+}
+Object.freeze(ObservableEvents);
+
 class Timer {
+    #observers = []
+
+    #state = TimerStates.Stopped
+
+    #duration = 0
+    #started = null
+    #ended = null
+
+    #interval = null
+
     /**
      *
-     * @param {Settings} settings
+     * @param event
+     * @param fn
      */
-    constructor(settings) {
-        this.state = TimerStates.Stopped
+    subscribe(event, fn) {
+        if (Object.values(ObservableEvents).indexOf(event) === -1) {
+            throw new Error("Wrong observable event passed");
+        }
 
-        this.duration = 0
-        this.started = null
-        this.ended = null
+        this.#observers.push({
+            event: event,
+            fn: fn
+        })
+    }
 
-        this.interval = null
+    /**
+     *
+     */
+    broadcast(event) {
+        if (Object.values(ObservableEvents).indexOf(event) === -1) {
+            throw new Error("Wrong observable event passed");
+        }
 
-        this.settings = settings
+        this.#observers.forEach(subscriber => {
+            if (subscriber.event === event) {
+                subscriber.fn(this)
+            }
+        })
+    }
+
+    isRunning() {
+        return this.#state === TimerStates.Running
+    }
+
+    /**
+     *
+     * @param {TimerStates} state
+     */
+    setState(state) {
+        this.#state = state
+        this.broadcast(ObservableEvents.StateChanged)
+    }
+
+    getState() {
+        return this.#state
     }
 
     start() {
-        if (this.state !== TimerStates.Started) {
-            this.started = new Date()
+        if (!this.isRunning()) {
+            this.#started = new Date()
         }
 
-        this.state = TimerStates.Running
+        this.setState(TimerStates.Running)
 
-        this.interval = setInterval(() => this.tick(), 1000)
+        this.#interval = setInterval(() => this.tick(), 1000)
     }
 
     stop() {
-        this.state = TimerStates.Stopped
-        this.ended = new Date()
-        clearInterval(this.interval)
+        clearInterval(this.#interval)
+
+        this.setState(TimerStates.Stopped)
+        this.#ended = new Date()
     }
 
     pause() {
-        this.state = TimerStates.Paused
-        clearInterval(this.interval)
+        clearInterval(this.#interval)
+
+        this.setState(TimerStates.Paused)
     }
 
     resume() {
-        this.state = TimerStates.Running
-        this.interval = setInterval(() => this.tick(), 1000)
+        this.#interval = setInterval(() => this.tick(), 1000)
+
+        this.setState(TimerStates.Running)
+    }
+
+    reset() {
+        this.#duration = 0
+        this.#started = null
+        this.#ended = null
+
+        this.#interval = null
+    }
+
+    export() {
+        return {
+            duration: this.#duration,
+            started: this.#started,
+            ended: this.#ended
+        }
     }
 
     /**
      *
      */
     tick() {
-        this.duration++
+        this.#duration++
 
-        const newMinute = this.duration / 60
+        console.log(this.#duration)
 
-        if (Number.isInteger(newMinute)) {
-            // @todo move to event
-            chrome.browserAction.setBadgeText({text: this.getDurationInMinutes()})
-
-            if (
-                this.settings.breaksEnable &&
-                Number.isInteger(newMinute / this.settings.breaksEvery)
-            ) {
-                if (this.settings.breaksNotify) {
-                    const opts = {
-                        type: "basic",
-                        iconUrl: chrome.extension.getURL("/assets/images/clock-128x128.png"),
-                        title: "Jonesy timer",
-                        message: this.settings.breaksEvery + " minutes passed. It`s time to take a break."
-                    }
-
-                    chrome.notifications.create("", opts)
-                }
-
-                if (this.settings.breaksSound) {
-                    const sound = new Audio(chrome.runtime.getURL("/assets/sounds/sound.mp3"))
-                    sound.play().catch(function (error) {
-                        console.error(error)
-                    })
-                }
-            }
+        if (Number.isInteger(this.#duration / 60)) {
+            this.broadcast(ObservableEvents.NewMinute);
         }
     }
 
     /**
      *
-     * @return {string}
+     * @return {number}
      */
     getDurationInMinutes() {
-        return Math.floor(this.duration / 60).toString()
-    }
-
-    /**
-     *
-     * @return {string}
-     */
-    getStartDate() {
-        const year = this.started.getFullYear()
-        const month = ("0" + (this.started.getMonth() + 1)).slice(-2)
-        const day = ("0" + this.started.getDate()).slice(-2)
-
-        return year + '-' + month + '-' + day
+        return Math.floor(this.#duration / 60)
     }
 }
 
 export {
     Timer,
-    TimerStates
+    TimerStates,
+    ObservableEvents
 }

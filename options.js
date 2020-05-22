@@ -63,6 +63,7 @@ async function run() {
             .clear()
             .finally(() => {
                 updateStatistics()
+                showStatus("Statistics removed")
             })
     }
 

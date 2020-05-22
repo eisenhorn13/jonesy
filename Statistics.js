@@ -70,17 +70,7 @@ class Statistics {
         })
     }
 
-    /**
-     *
-     * @param {Timer} timer
-     */
-    add(timer) {
-        const data = {
-            duration: timer.duration,
-            started: timer.started,
-            ended: timer.ended
-        }
-
+    add(data) {
         this.data.push(data)
     }
 
