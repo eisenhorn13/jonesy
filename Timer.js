@@ -1,4 +1,5 @@
 import Observable from "./Observable.js";
+import Duration from "./Duration.js";
 
 const TimerStates = {
     Stopped: 0,
@@ -10,9 +11,7 @@ Object.freeze(TimerStates);
 class Timer extends Observable {
     #state = TimerStates.Stopped
 
-    #duration = 0
-    #started = null
-    #ended = null
+    duration
 
     #interval = null
 
@@ -21,11 +20,6 @@ class Timer extends Observable {
             "StateChanged",
             "NewMinute"
         ]);
-    }
-
-
-    isRunning() {
-        return this.#state === TimerStates.Running
     }
 
     /**
@@ -42,67 +36,44 @@ class Timer extends Observable {
     }
 
     start() {
-        if (!this.isRunning()) {
-            this.#started = new Date()
+        if (this.#state !== TimerStates.Running) {
+            this.duration = new Duration()
+            this.duration.start()
         }
-
-        this.setState(TimerStates.Running)
-
         this.#interval = setInterval(() => this.tick(), 1000)
+        this.setState(TimerStates.Running)
     }
 
     stop() {
         clearInterval(this.#interval)
-
+        this.duration.stop();
         this.setState(TimerStates.Stopped)
-        this.#ended = new Date()
     }
 
     pause() {
         clearInterval(this.#interval)
-
         this.setState(TimerStates.Paused)
     }
 
     resume() {
         this.#interval = setInterval(() => this.tick(), 1000)
-
         this.setState(TimerStates.Running)
     }
 
     reset() {
-        this.#duration = 0
-        this.#started = null
-        this.#ended = null
-
+        this.duration = new Duration()
         this.#interval = null
-    }
-
-    export() {
-        return {
-            duration: this.#duration,
-            started: this.#started,
-            ended: this.#ended
-        }
     }
 
     /**
      *
      */
     tick() {
-        this.#duration++
+        this.duration.increment()
 
-        if (Number.isInteger(this.#duration / 60)) {
+        if (Number.isInteger(this.duration.seconds / 60)) {
             this.broadcast("NewMinute");
         }
-    }
-
-    /**
-     *
-     * @return {number}
-     */
-    getDurationInMinutes() {
-        return Math.floor(this.#duration / 60)
     }
 }
 

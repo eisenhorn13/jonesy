@@ -80,7 +80,7 @@ async function run() {
                 entry.started.getFullYear() === today.getFullYear()
             ) {
                 tracks++
-                duration += entry.duration
+                duration += entry.seconds
             }
         })
 

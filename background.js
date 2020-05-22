@@ -54,7 +54,7 @@ async function run() {
         broadcastTimer.stop()
 
         let statistics = await Statistics.createFromStorageData()
-        statistics.add(broadcastTimer.export())
+        statistics.add(broadcastTimer.duration)
         await statistics.save()
 
         broadcastTimer.reset()
@@ -80,7 +80,7 @@ async function run() {
             case TimerStates.Running:
                 chrome.browserAction.setTitle({title: ""});
                 chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"})
-                chrome.browserAction.setBadgeText({text: broadcastTimer.getDurationInMinutes().toString()})
+                chrome.browserAction.setBadgeText({text: broadcastTimer.duration.minutes.toString()})
                 break
             case TimerStates.Paused:
                 chrome.browserAction.setBadgeBackgroundColor({color: "#d1d1d1"})
@@ -98,7 +98,7 @@ async function run() {
 
         if (
             settings.breaksEnable &&
-            Number.isInteger(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)
+            Number.isInteger(broadcastTimer.duration.minutes / settings.breaksEvery)
         ) {
             if (settings.breaksNotify) {
                 const opts = {

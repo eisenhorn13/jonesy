@@ -1,12 +1,14 @@
+import Duration from "./Duration.js";
+
 class Statistics {
     /**
      *
-     * @param {Array.<Object>} data
+     * @param {Array.<Duration>} data
      */
     constructor(data) {
         /**
          *
-         * @type {Array.<Object>}
+         * @type {Array.<Duration>}
          */
         this.data = data
     }
@@ -16,11 +18,9 @@ class Statistics {
      * @param {Array.<Object>} json
      */
     static fromJSON(json) {
-        json = json.map(entry => ({
-            duration: Number(entry.duration),
-            started: new Date(entry.started),
-            ended: new Date(entry.ended)
-        }))
+        json = json.map(entry => {
+            return Duration.fromJSON(entry)
+        })
 
         return new this(json)
     }
@@ -50,7 +50,11 @@ class Statistics {
      * @return {Object}
      */
     toJSON() {
-        return JSON.stringify(this.data)
+        let data = this.data.map((entry) => {
+            return entry.export()
+        })
+
+        return JSON.stringify(data)
     }
 
     /**
@@ -70,8 +74,12 @@ class Statistics {
         })
     }
 
-    add(data) {
-        this.data.push(data)
+    /**
+     *
+     * @param {Duration} duration
+     */
+    add(duration) {
+        this.data.push(duration)
     }
 
     /**
