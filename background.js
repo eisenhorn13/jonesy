@@ -3,8 +3,6 @@ import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
 
 async function run() {
-    let settings = await Settings.createFromStorageData()
-
     let timer = new Timer()
     timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateMenu(broadcastTimer))
     timer.subscribe(ObservableEvents.StateChanged, (broadcastTimer) => updateBadge(broadcastTimer))
@@ -94,7 +92,10 @@ async function run() {
      *
      * @param {Timer} broadcastTimer
      */
-    function notify(broadcastTimer) {
+    async function notify(broadcastTimer) {
+        // Update settings on the go
+        let settings = await Settings.createFromStorageData()
+
         if (
             settings.breaksEnable &&
             Number.isInteger(broadcastTimer.getDurationInMinutes() / settings.breaksEvery)
