@@ -72,6 +72,7 @@ async function run() {
 
         const today = new Date()
         let tracks = 0;
+        let tracksStr = "";
         let duration = 0;
         statistics.data.forEach((entry) => {
             if (
@@ -81,14 +82,17 @@ async function run() {
             ) {
                 tracks++
                 duration += entry.seconds
+                tracksStr += "<p>" +
+                    entry.started.getHours() + ":" + entry.started.getMinutes() + " - " +
+                    entry.stopped.getHours() + ":" + entry.stopped.getMinutes() + " - " +
+                    (entry.seconds / 60).toFixed(2) + " min</p>"
             }
         })
 
         let container = document.getElementById('statistics')
         container.innerHTML = ""
-        container.insertAdjacentHTML("beforeend", "<p>Today " + tracks + " tracks</p>")
-        let min = (duration / 60).toFixed(1)
-        container.insertAdjacentHTML("beforeend", "<p>Duration: " + min + " min</p>")
+        container.insertAdjacentHTML("beforeend", "<h2>Today: " + tracks + " tracks / " + (duration / 60).toFixed(2) + " min</h2>")
+        container.insertAdjacentHTML("beforeend", "<div>" + tracksStr + "</div>")
     }
 
     function showStatus(text) {

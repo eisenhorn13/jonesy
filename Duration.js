@@ -5,10 +5,6 @@ class Duration {
         this.stopped = null
     }
 
-    get minutes() {
-        return Math.floor(this.seconds / 60)
-    }
-
     static fromJSON(entry) {
         let duration = new Duration();
         duration.seconds = Number(entry.seconds)
@@ -16,6 +12,10 @@ class Duration {
         duration.stopped = new Date(entry.stopped)
 
         return duration
+    }
+
+    get minutes() {
+        return Math.floor(this.seconds / 60)
     }
 
     start() {
