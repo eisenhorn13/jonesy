@@ -78,7 +78,7 @@ async function run() {
                 chrome.browserAction.setBadgeText({text: ""})
                 break
             case TimerStates.Running:
-                chrome.browserAction.setTitle({title: ""});
+                chrome.browserAction.setTitle({title: ""})
                 chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"})
                 chrome.browserAction.setBadgeText({text: broadcastTimer.duration.minutes.toString()})
                 break

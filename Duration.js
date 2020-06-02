@@ -27,7 +27,7 @@ class Duration {
     }
 
     increment() {
-        this.seconds++;
+        this.seconds++
     }
 
     reset() {

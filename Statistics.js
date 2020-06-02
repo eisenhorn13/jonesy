@@ -1,4 +1,4 @@
-import Duration from "./Duration.js";
+import Duration from "./Duration.js"
 
 class Statistics {
     /**

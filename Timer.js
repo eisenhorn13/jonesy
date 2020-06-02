@@ -1,12 +1,12 @@
-import Observable from "./Observable.js";
-import Duration from "./Duration.js";
+import Observable from "./Observable.js"
+import Duration from "./Duration.js"
 
 const TimerStates = {
     Stopped: 0,
     Running: 1,
     Paused: 2
 }
-Object.freeze(TimerStates);
+Object.freeze(TimerStates)
 
 class Timer extends Observable {
     #state = TimerStates.Stopped
@@ -19,7 +19,7 @@ class Timer extends Observable {
         super([
             "StateChanged",
             "NewMinute"
-        ]);
+        ])
     }
 
     /**
@@ -46,7 +46,7 @@ class Timer extends Observable {
 
     stop() {
         clearInterval(this.#interval)
-        this.duration.stop();
+        this.duration.stop()
         this.setState(TimerStates.Stopped)
     }
 
@@ -72,7 +72,7 @@ class Timer extends Observable {
         this.duration.increment()
 
         if (Number.isInteger(this.duration.seconds / 60)) {
-            this.broadcast("NewMinute");
+            this.broadcast("NewMinute")
         }
     }
 }

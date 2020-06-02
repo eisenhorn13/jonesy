@@ -18,7 +18,7 @@ class Observable {
      */
     subscribe(event, fn) {
         if (!this.#events.includes(event)) {
-            throw new Error("Wrong observable event passed");
+            throw new Error("Wrong observable event passed")
         }
 
         this.#observers.push({
@@ -32,7 +32,7 @@ class Observable {
      */
     broadcast(event) {
         if (!this.#events.includes(event)) {
-            throw new Error("Wrong observable event passed");
+            throw new Error("Wrong observable event passed")
         }
 
         this.#observers.forEach(subscriber => {

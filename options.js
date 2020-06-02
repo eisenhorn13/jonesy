@@ -71,9 +71,9 @@ async function run() {
         statistics = await Statistics.createFromStorageData()
 
         const today = new Date()
-        let tracks = 0;
-        let tracksStr = "";
-        let duration = 0;
+        let tracks = 0
+        let tracksStr = ""
+        let duration = 0
         statistics.data.forEach((entry) => {
             if (
                 entry.started.getDate() === today.getDate() &&
