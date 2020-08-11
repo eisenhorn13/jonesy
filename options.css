@@ -41,3 +41,7 @@ button {
 #breaksEvery {
     width: 40px
 }
+
+label {
+    cursor: pointer;
+}
