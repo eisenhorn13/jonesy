@@ -24,6 +24,11 @@ class Settings {
          * @type {boolean}
          */
         this.breaksSound = options.breaksSound
+        /**
+         *
+         * @type {boolean}
+         */
+        this.breaksPausesTimer = options.breaksPausesTimer
     }
 
     /**
@@ -36,7 +41,8 @@ class Settings {
                 breaksEnable: false,
                 breaksEvery: 1,
                 breaksNotify: true,
-                breaksSound: true
+                breaksSound: true,
+                breaksPausesTimer: false
             }, (items) => {
                 resolve(new this(items))
             })
@@ -53,7 +59,8 @@ class Settings {
                 breaksEnable: this.breaksEnable,
                 breaksEvery: this.breaksEvery,
                 breaksNotify: this.breaksNotify,
-                breaksSound: this.breaksSound
+                breaksSound: this.breaksSound,
+                breaksPausesTimer: this.breaksPausesTimer
             }, function () {
                 if (chrome.runtime.lastError) {
                     console.error(chrome.runtime.lastError.message)

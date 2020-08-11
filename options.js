@@ -17,6 +17,7 @@ async function run() {
     document.getElementById('breaksEvery').value = settings.breaksEvery
     document.getElementById('breaksNotify').checked = settings.breaksNotify
     document.getElementById('breaksSound').checked = settings.breaksSound
+    document.getElementById('breaksPausesTimer').checked = settings.breaksPausesTimer
 
     toggleSubsEnabled()
 
@@ -27,23 +28,28 @@ async function run() {
         const breaksEvery = document.getElementById('breaksEvery')
         const breaksNotify = document.getElementById('breaksNotify')
         const breaksSound = document.getElementById('breaksSound')
+        const breaksPausesTimer = document.getElementById('breaksPausesTimer')
 
         if (checkbox.checked) {
             breaksEvery.disabled = false
             breaksNotify.disabled = false
             breaksSound.disabled = false
+            breaksPausesTimer.disabled = false
 
             breaksEvery.parentNode.classList.remove("disabled")
             breaksNotify.parentNode.classList.remove("disabled")
             breaksSound.parentNode.classList.remove("disabled")
+            breaksPausesTimer.parentNode.classList.remove("disabled")
         } else {
             breaksEvery.disabled = true
             breaksNotify.disabled = true
             breaksSound.disabled = true
+            breaksPausesTimer.disabled = true
 
             breaksEvery.parentNode.classList.add("disabled")
             breaksNotify.parentNode.classList.add("disabled")
             breaksSound.parentNode.classList.add("disabled")
+            breaksPausesTimer.parentNode.classList.add("disabled")
         }
     }
 
@@ -52,6 +58,7 @@ async function run() {
         settings.breaksEvery = parseInt(document.getElementById('breaksEvery').value, 10)
         settings.breaksNotify = document.getElementById('breaksNotify').checked
         settings.breaksSound = document.getElementById('breaksSound').checked
+        settings.breaksPausesTimer = document.getElementById('breaksPausesTimer').checked
 
         settings
             .save()

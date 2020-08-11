@@ -100,6 +100,10 @@ async function run() {
             settings.breaksEnable &&
             Number.isInteger(broadcastTimer.duration.minutes / settings.breaksEvery)
         ) {
+            if (settings.breaksPausesTimer) {
+                timer.pause()
+            }
+
             if (settings.breaksNotify) {
                 const opts = {
                     type: "basic",
