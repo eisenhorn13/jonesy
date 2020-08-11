@@ -45,3 +45,15 @@ button {
 label {
     cursor: pointer;
 }
+
+#exportStatisticsField,
+#importStatisticsField {
+    width: 100%;
+    height: 300px;
+    margin-top: 20px;
+}
+
+#exportStatistics,
+#importStatistics {
+    display: none;
+}

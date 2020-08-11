@@ -11,6 +11,9 @@ async function run() {
 
     document.getElementById('save').addEventListener('click', saveOptions)
     document.getElementById('clearStatistics').addEventListener('click', clearStatistics)
+    document.getElementById('exportStatisticsButton').addEventListener('click', onClickExportStatisticsButton)
+    document.getElementById('importStatisticsButton').addEventListener('click', onClickImportStatisticsButton)
+    document.getElementById('importStatisticsSubmit').addEventListener('click', onClickImportStatisticsSubmit)
     document.getElementById('breaksEnable').addEventListener('click', toggleSubsEnabled)
 
     document.getElementById('breaksEnable').checked = settings.breaksEnable
@@ -70,11 +73,77 @@ async function run() {
             statistics
                 .clear()
                 .finally(() => {
+                    document.getElementById('statisticsExportField').style.display = 'none'
                     updateStatistics()
                     showStatus("Statistics removed")
                 })
         }
     }
+
+    async function onClickExportStatisticsButton() {
+        const statisticsExport = document.getElementById('exportStatistics')
+        const statisticsExportField = document.getElementById('exportStatisticsField')
+
+        if (statisticsExport.style.display !== 'block') {
+            statistics = await Statistics.createFromStorageData()
+            statisticsExportField.innerText = statistics.toJSON()
+            statisticsExport.style.display = 'block'
+        } else {
+            statisticsExport.style.display = 'none'
+        }
+    }
+
+    function onClickImportStatisticsButton() {
+        const importStatistics = document.getElementById('importStatistics')
+        const importStatisticsField = document.getElementById('importStatisticsField')
+
+        if (importStatistics.style.display !== 'block') {
+            importStatisticsField.value = ''
+            importStatistics.style.display = 'block'
+        } else {
+            importStatistics.style.display = 'none'
+        }
+    }
+
+    function onClickImportStatisticsSubmit() {
+        const importStatisticsField = document.getElementById('importStatisticsField')
+
+        try {
+            const data = JSON.parse(importStatisticsField.value)
+
+            validateImportStatistics(data)
+
+            statistics = Statistics.fromJSON(data)
+            statistics.save()
+
+            document.getElementById('importStatistics')
+            showStatus("Statistics imported").style.display = 'none'
+        } catch (e) {
+            console.log(e)
+            if (e instanceof SyntaxError) {
+                alert('Not valid JSON')
+            } else if (e instanceof Error) {
+                alert(e.message)
+            }
+        }
+    }
+
+    function validateImportStatistics(json) {
+        if (json.length === 0) {
+            throw new Error('Empty data')
+        }
+
+        Object.keys(json).forEach(key => {
+            if (
+                json[key].seconds === undefined ||
+                json[key].started === undefined ||
+                json[key].stopped === undefined
+            ) {
+                throw new Error('Wrong data format')
+            }
+        })
+    }
+
 
     async function updateStatistics() {
         statistics = await Statistics.createFromStorageData()

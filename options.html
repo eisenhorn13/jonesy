@@ -53,9 +53,31 @@
     <h1>Statistics</h1>
     <div id="statistics"></div>
 
-    <button id="clearStatistics">Clear statistics</button>
+    <button id="exportStatisticsButton">Export</button>
+    <button id="importStatisticsButton">Import</button>
+    <button id="clearStatistics">Clear</button>
+
+    <div id="exportStatistics">
+        <label for="exportStatisticsField">
+            <textarea id="exportStatisticsField"></textarea>
+        </label>
+
+        <label for="exportStatisticsType">
+            <select id="exportStatisticsType">
+                <option value="json">JSON</option>
+            </select>
+        </label>
+    </div>
+
+    <div id="importStatistics">
+        <label for="importStatisticsField">
+            <textarea id="importStatisticsField"></textarea>
+        </label>
+        <button id="importStatisticsSubmit">Import statistics</button>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="options.js" type="module"></script>
 </body>
 </html>
