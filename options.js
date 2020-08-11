@@ -66,12 +66,14 @@ async function run() {
     }
 
     async function clearStatistics() {
-        statistics
-            .clear()
-            .finally(() => {
-                updateStatistics()
-                showStatus("Statistics removed")
-            })
+        if (confirm('Really remove all statistics?')) {
+            statistics
+                .clear()
+                .finally(() => {
+                    updateStatistics()
+                    showStatus("Statistics removed")
+                })
+        }
     }
 
     async function updateStatistics() {
