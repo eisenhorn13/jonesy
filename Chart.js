@@ -1,18 +1,24 @@
 export default class Chart {
-    constructor(element, data, width, height) {
-        this.element = element
+    constructor(canvas, data, width, height) {
+        this.canvas = canvas
 
         /**
          * @type Statistics
          */
         this.data = data
+
         this.width = width
         this.height = height
 
-        this.element.width = this.width
-        this.element.height = this.height
+        this.canvas.style.width = this.width + "px"
+        this.canvas.style.height = this.height + "px"
 
-        this.ctx = element.getContext("2d")
+        this.ctx = this.canvas.getContext("2d")
+
+        this.canvas.width = this.width * window.devicePixelRatio
+        this.canvas.height = this.height * window.devicePixelRatio
+
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
     /**
