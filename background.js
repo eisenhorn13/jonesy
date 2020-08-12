@@ -24,6 +24,22 @@ async function run() {
         }
     })
 
+    chrome.commands.onCommand.addListener((command) => {
+        if (command === "toggle-timer") {
+            switch (timer.getState()) {
+                case TimerStates.Stopped:
+                    timer.start()
+                    break
+                case TimerStates.Running:
+                    timer.pause()
+                    break
+                case TimerStates.Paused:
+                    timer.resume()
+                    break
+            }
+        }
+    });
+
     /**
      *
      * @param {Timer} broadcastTimer

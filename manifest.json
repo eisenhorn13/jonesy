@@ -18,5 +18,14 @@
     "16": "assets/images/clock-16x16.png",
     "48": "assets/images/clock-48x48.png",
     "128": "assets/images/clock-128x128.png"
+  },
+  "commands": {
+    "toggle-timer": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P"
+      },
+      "description": "Start/Pause timer",
+      "global": true
+    }
   }
 }
