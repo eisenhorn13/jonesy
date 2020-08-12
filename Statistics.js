@@ -1,6 +1,12 @@
 import Duration from "./Duration.js"
 
-class Statistics {
+export default class Statistics {
+    /**
+     *
+     * @type {Array.<Duration>}
+     */
+    #data = []
+
     /**
      *
      * @param {Array.<Duration>} data
@@ -10,14 +16,14 @@ class Statistics {
          *
          * @type {Array.<Duration>}
          */
-        this.data = data
+        this.#data = data
     }
 
     /**
      *
      * @param {Array.<Object>} json
      */
-    static fromJSON(json) {
+    static createFromJSON(json) {
         json = json.map(entry => {
             return Duration.fromJSON(entry)
         })
@@ -39,7 +45,7 @@ class Statistics {
                     reject(false)
                 } else {
                     const json = JSON.parse(items.statistics)
-                    resolve(this.fromJSON(json))
+                    resolve(this.createFromJSON(json))
                 }
             })
         })
@@ -50,7 +56,7 @@ class Statistics {
      * @return {Object}
      */
     toJSON() {
-        let data = this.data.map((entry) => {
+        let data = this.#data.map((entry) => {
             return entry.export()
         })
 
@@ -79,7 +85,7 @@ class Statistics {
      * @param {Duration} duration
      */
     add(duration) {
-        this.data.push(duration)
+        this.#data.push(duration)
     }
 
     /**
@@ -88,7 +94,7 @@ class Statistics {
      */
     save() {
         return new Promise((resolve, reject) => {
-            if (!this.data) {
+            if (!this.#data) {
                 return resolve(true)
             }
 
@@ -112,7 +118,7 @@ class Statistics {
     today() {
         const today = new Date()
 
-        return this.data.filter((entry) => {
+        return this.#data.filter((entry) => {
             if (
                 entry.started.getDate() === today.getDate() &&
                 entry.started.getMonth() === today.getMonth() &&
@@ -128,7 +134,7 @@ class Statistics {
      * @return {Array.<Duration>}
      */
     month(month, year) {
-        return this.data.filter((entry) => {
+        return this.#data.filter((entry) => {
             if (
                 entry.started.getMonth() === month &&
                 entry.started.getFullYear() === year
@@ -138,5 +144,3 @@ class Statistics {
         })
     }
 }
-
-export default Statistics

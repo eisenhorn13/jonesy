@@ -114,7 +114,7 @@ async function run() {
 
             validateImportStatistics(data)
 
-            statistics = Statistics.fromJSON(data)
+            statistics = Statistics.createFromJSON(data)
             statistics.save()
 
             document.getElementById('importStatistics').style.display = 'none'
