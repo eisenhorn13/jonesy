@@ -1,5 +1,6 @@
 import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
+import Chart from "./Chart.js";
 
 let settings
 let statistics
@@ -116,8 +117,8 @@ async function run() {
             statistics = Statistics.fromJSON(data)
             statistics.save()
 
-            document.getElementById('importStatistics')
-            showStatus("Statistics imported").style.display = 'none'
+            document.getElementById('importStatistics').style.display = 'none'
+            showStatus("Statistics imported")
         } catch (e) {
             console.log(e)
             if (e instanceof SyntaxError) {
@@ -144,33 +145,24 @@ async function run() {
         })
     }
 
-
     async function updateStatistics() {
         statistics = await Statistics.createFromStorageData()
 
-        const today = new Date()
         let tracks = 0
-        let tracksStr = ""
         let duration = 0
-        statistics.data.forEach((entry) => {
-            if (
-                entry.started.getDate() === today.getDate() &&
-                entry.started.getMonth() === today.getMonth() &&
-                entry.started.getFullYear() === today.getFullYear()
-            ) {
-                tracks++
-                duration += entry.seconds
-                tracksStr += "<p>" +
-                    entry.started.getHours() + ":" + entry.started.getMinutes() + " - " +
-                    entry.stopped.getHours() + ":" + entry.stopped.getMinutes() + " - " +
-                    (entry.seconds / 60).toFixed(2) + " min</p>"
-            }
+
+        statistics.today().forEach((entry) => {
+            tracks++
+            duration += entry.seconds
         })
 
         let container = document.getElementById('statistics')
         container.innerHTML = ""
-        container.insertAdjacentHTML("beforeend", "<h2>Today: " + tracks + " tracks / " + (duration / 60).toFixed(2) + " min</h2>")
-        container.insertAdjacentHTML("beforeend", "<div>" + tracksStr + "</div>")
+        container.insertAdjacentHTML("beforeend", "<div id='today'>Today: " + tracks + " tracks / " + (duration / 60).toFixed(2) + " min total</div>")
+
+        const chartElement = document.getElementById('chart')
+        const chart = new Chart(chartElement, statistics, 600, 150)
+        chart.draw()
     }
 
     function showStatus(text) {

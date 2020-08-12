@@ -9,6 +9,7 @@ body {
 
 h1 {
     border-bottom: solid 1px grey;
+    font-weight: 400;
 }
 
 #status {
@@ -44,6 +45,11 @@ button {
 
 label {
     cursor: pointer;
+}
+
+#today {
+    text-align: center;
+    font-size: 1.4em;
 }
 
 #exportStatisticsField,

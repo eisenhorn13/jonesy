@@ -104,6 +104,39 @@ class Statistics {
             })
         })
     }
+
+    /**
+     *
+     * @return {Array.<Duration>}
+     */
+    today() {
+        const today = new Date()
+
+        return this.data.filter((entry) => {
+            if (
+                entry.started.getDate() === today.getDate() &&
+                entry.started.getMonth() === today.getMonth() &&
+                entry.started.getFullYear() === today.getFullYear()
+            ) {
+                return entry
+            }
+        })
+    }
+
+    /**
+     *
+     * @return {Array.<Duration>}
+     */
+    month(month, year) {
+        return this.data.filter((entry) => {
+            if (
+                entry.started.getMonth() === month &&
+                entry.started.getFullYear() === year
+            ) {
+                return entry
+            }
+        })
+    }
 }
 
 export default Statistics
