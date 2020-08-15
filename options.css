@@ -31,8 +31,12 @@ h1 {
     color: grey;
 }
 
-.field .sub {
+.field .field {
     padding-left: 22px;
+}
+
+.field .field:first-of-type {
+    margin-top: 10px;
 }
 
 button {

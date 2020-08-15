@@ -2,99 +2,189 @@ import Statistics from "./Statistics.js"
 import Settings from "./Settings.js"
 import Chart from "./Chart.js";
 
-let settings
-let statistics
+document.addEventListener('DOMContentLoaded', async () => {
+    const settings = await Settings.createFromStorageData()
 
-document.addEventListener('DOMContentLoaded', run)
+    new OptionsSection(settings)
+    const statisticsSection = new StatisticsSection()
+    await statisticsSection.refreshStatistics()
+})
 
-async function run() {
-    settings = await Settings.createFromStorageData()
+class OptionsSection {
+    #settings
 
-    document.getElementById('save').addEventListener('click', saveOptions)
-    document.getElementById('clearStatistics').addEventListener('click', clearStatistics)
-    document.getElementById('exportStatisticsButton').addEventListener('click', onClickExportStatisticsButton)
-    document.getElementById('importStatisticsButton').addEventListener('click', onClickImportStatisticsButton)
-    document.getElementById('importStatisticsSubmit').addEventListener('click', onClickImportStatisticsSubmit)
-    document.getElementById('breaksEnable').addEventListener('click', toggleSubsEnabled)
+    /**
+     *
+     * @param {Settings} settings
+     */
+    constructor(settings) {
+        this.#settings = settings
 
-    document.getElementById('breaksEnable').checked = settings.breaksEnable
-    document.getElementById('breaksEvery').value = settings.breaksEvery
-    document.getElementById('breaksNotify').checked = settings.breaksNotify
-    document.getElementById('breaksSound').checked = settings.breaksSound
-    document.getElementById('breaksPausesTimer').checked = settings.breaksPausesTimer
+        this.populateFields()
+        this.toggleSubsAvailability(document.getElementById('breaksEnable'))
+        this.bindEvents()
+    }
 
-    toggleSubsEnabled()
+    /**
+     *
+     */
+    bindEvents() {
+        document.getElementById('save').addEventListener('click', () => this.onClickSave())
+        document.getElementById('breaksEnable').addEventListener('click', (e) => {
+            this.toggleSubsAvailability(e.currentTarget)
+        })
+    }
 
-    await updateStatistics()
+    /**
+     *
+     */
+    populateFields() {
+        Object.keys(this.#settings).forEach((key) => {
+            const element = document.getElementById(key)
+            switch (typeof this.#settings[key]) {
+                case "boolean":
+                    element.checked = this.#settings[key]
+                    break
+                case "number":
+                    element.value = this.#settings[key].toString()
+                    break
+            }
+        })
+    }
 
-    function toggleSubsEnabled() {
-        const checkbox = document.getElementById('breaksEnable')
-        const breaksEvery = document.getElementById('breaksEvery')
-        const breaksNotify = document.getElementById('breaksNotify')
-        const breaksSound = document.getElementById('breaksSound')
-        const breaksPausesTimer = document.getElementById('breaksPausesTimer')
+    /**
+     *
+     */
+    collectValues() {
+        Object.keys(this.#settings).forEach((key) => {
+            const element = document.getElementById(key)
+            switch (typeof this.#settings[key]) {
+                case "boolean":
+                    this.#settings[key] = element.checked
+                    break
+                case "number":
+                    this.#settings[key] = Math.abs(Number(element.value))
+                    break
+            }
+        });
+    }
 
-        if (checkbox.checked) {
-            breaksEvery.disabled = false
-            breaksNotify.disabled = false
-            breaksSound.disabled = false
-            breaksPausesTimer.disabled = false
+    /**
+     *
+     */
+    onClickSave() {
+        this.collectValues()
 
-            breaksEvery.parentNode.classList.remove("disabled")
-            breaksNotify.parentNode.classList.remove("disabled")
-            breaksSound.parentNode.classList.remove("disabled")
-            breaksPausesTimer.parentNode.classList.remove("disabled")
-        } else {
-            breaksEvery.disabled = true
-            breaksNotify.disabled = true
-            breaksSound.disabled = true
-            breaksPausesTimer.disabled = true
+        this.#settings
+            .save()
+            .then(() => showNotification('Options saved'))
+    }
 
-            breaksEvery.parentNode.classList.add("disabled")
-            breaksNotify.parentNode.classList.add("disabled")
-            breaksSound.parentNode.classList.add("disabled")
-            breaksPausesTimer.parentNode.classList.add("disabled")
+    /**
+     *
+     */
+    toggleSubsAvailability(rootCheckboxElement) {
+        const children = rootCheckboxElement.parentNode.parentNode.getElementsByClassName('field')
+
+        for (let item of children) {
+            if (rootCheckboxElement.checked) {
+                item.classList.remove("disabled")
+                item.getElementsByTagName('input')[0].disabled = false
+            } else {
+                item.classList.add("disabled")
+                item.getElementsByTagName('input')[0].disabled = true
+            }
         }
     }
+}
 
-    function saveOptions() {
-        settings.breaksEnable = document.getElementById('breaksEnable').checked
-        settings.breaksEvery = parseInt(document.getElementById('breaksEvery').value, 10)
-        settings.breaksNotify = document.getElementById('breaksNotify').checked
-        settings.breaksSound = document.getElementById('breaksSound').checked
-        settings.breaksPausesTimer = document.getElementById('breaksPausesTimer').checked
+class StatisticsSection {
+    #statistics
 
-        settings
-            .save()
-            .then(() => showStatus('Options saved.'))
+    constructor() {
+        this.bindEvents()
     }
 
-    async function clearStatistics() {
+    bindEvents() {
+        document.getElementById('clearStatistics').addEventListener('click', () => this.onClickClearStatistics())
+        document.getElementById('exportStatisticsButton').addEventListener('click', () => this.onClickExportStatisticsButton())
+        document.getElementById('importStatisticsButton').addEventListener('click', this.onClickImportStatisticsButton)
+        document.getElementById('importStatisticsSubmit').addEventListener('click', () => this.onClickImportStatisticsSubmit())
+    }
+
+    /**
+     *
+     * @return {undefined}
+     */
+    async refreshStatistics() {
+        this.#statistics = await Statistics.createFromStorageData()
+
+        this.updateTodayStats()
+        this.updateChart()
+    }
+
+    updateTodayStats() {
+        let tracks = 0
+        let duration = 0
+
+        this.#statistics.today().forEach((entry) => {
+            tracks++
+            duration += entry.seconds
+        })
+
+        let container = document.getElementById('statistics')
+        container.innerHTML = ""
+        container.insertAdjacentHTML("beforeend", "<div id='today'>Today: " + tracks + " tracks / " + (duration / 60).toFixed(2) + " min total</div>")
+    }
+
+    updateChart() {
+        const chartElement = document.getElementById('chart')
+        const chart = new Chart(chartElement, this.#statistics, 600, 150)
+        chart.draw()
+    }
+
+    /**
+     *
+     * @return {Promise<void>}
+     */
+    async onClickClearStatistics() {
         if (confirm('Really remove all statistics?')) {
-            statistics
+            this.#statistics
                 .clear()
                 .finally(() => {
-                    document.getElementById('statisticsExportField').style.display = 'none'
-                    updateStatistics()
-                    showStatus("Statistics removed")
+                    document.getElementById('exportStatistics').style.display = 'none'
+                    document.getElementById('importStatistics').style.display = 'none'
+                    this.refreshStatistics()
+                    showNotification("Statistics removed")
                 })
         }
     }
 
-    async function onClickExportStatisticsButton() {
+    /**
+     *
+     * @return {Promise<void>}
+     */
+    async onClickExportStatisticsButton() {
+        document.getElementById('importStatistics').style.display = 'none'
+
         const statisticsExport = document.getElementById('exportStatistics')
         const statisticsExportField = document.getElementById('exportStatisticsField')
 
         if (statisticsExport.style.display !== 'block') {
-            statistics = await Statistics.createFromStorageData()
-            statisticsExportField.innerText = statistics.toJSON()
+            await this.refreshStatistics()
+            statisticsExportField.innerText = this.#statistics.toJSON()
             statisticsExport.style.display = 'block'
         } else {
             statisticsExport.style.display = 'none'
         }
     }
 
-    function onClickImportStatisticsButton() {
+    /**
+     *
+     */
+    onClickImportStatisticsButton() {
+        document.getElementById('exportStatistics').style.display = 'none'
+
         const importStatistics = document.getElementById('importStatistics')
         const importStatisticsField = document.getElementById('importStatisticsField')
 
@@ -106,19 +196,24 @@ async function run() {
         }
     }
 
-    function onClickImportStatisticsSubmit() {
+    /**
+     *
+     */
+    onClickImportStatisticsSubmit() {
         const importStatisticsField = document.getElementById('importStatisticsField')
 
         try {
             const data = JSON.parse(importStatisticsField.value)
 
-            validateImportStatistics(data)
+            this.validateImportStatistics(data)
 
-            statistics = Statistics.createFromJSON(data)
-            statistics.save()
+            this.#statistics = Statistics.createFromJSON(data)
+            this.#statistics.save()
 
             document.getElementById('importStatistics').style.display = 'none'
-            showStatus("Statistics imported")
+            showNotification("Statistics imported")
+
+            this.refreshStatistics()
         } catch (e) {
             console.log(e)
             if (e instanceof SyntaxError) {
@@ -129,7 +224,11 @@ async function run() {
         }
     }
 
-    function validateImportStatistics(json) {
+    /**
+     *
+     * @param json
+     */
+    validateImportStatistics(json) {
         if (json.length === 0) {
             throw new Error('Empty data')
         }
@@ -144,35 +243,19 @@ async function run() {
             }
         })
     }
+}
 
-    async function updateStatistics() {
-        statistics = await Statistics.createFromStorageData()
+/**
+ *
+ * @param text
+ */
+function showNotification(text) {
+    const status = document.getElementById('status')
+    status.textContent = text
+    status.style.display = 'block'
 
-        let tracks = 0
-        let duration = 0
-
-        statistics.today().forEach((entry) => {
-            tracks++
-            duration += entry.seconds
-        })
-
-        let container = document.getElementById('statistics')
-        container.innerHTML = ""
-        container.insertAdjacentHTML("beforeend", "<div id='today'>Today: " + tracks + " tracks / " + (duration / 60).toFixed(2) + " min total</div>")
-
-        const chartElement = document.getElementById('chart')
-        const chart = new Chart(chartElement, statistics, 600, 150)
-        chart.draw()
-    }
-
-    function showStatus(text) {
-        const status = document.getElementById('status')
-        status.textContent = text
-        status.style.display = 'block'
-
-        setTimeout(function () {
-            status.textContent = ''
-            status.style.display = 'none'
-        }, 1000)
-    }
+    setTimeout(function () {
+        status.textContent = ''
+        status.style.display = 'none'
+    }, 1000)
 }
