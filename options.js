@@ -77,7 +77,7 @@ class OptionsSection {
 
         this.#settings
             .save()
-            .then(() => showNotification('Options saved'))
+            .then(() => showNotification('👌 Options saved'))
     }
 
     /**
@@ -211,7 +211,7 @@ class StatisticsSection {
             this.#statistics.save()
 
             document.getElementById('importStatistics').style.display = 'none'
-            showNotification("Statistics imported")
+            showNotification("👌 Statistics imported")
 
             this.refreshStatistics()
         } catch (e) {

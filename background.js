@@ -88,7 +88,7 @@ async function run() {
      *
      * @param {Timer} broadcastTimer
      */
-    function updateBadge(broadcastTimer) {
+    async function updateBadge(broadcastTimer) {
         switch (broadcastTimer.getState()) {
             case TimerStates.Stopped:
                 chrome.browserAction.setBadgeText({text: ""})
@@ -96,7 +96,16 @@ async function run() {
             case TimerStates.Running:
                 chrome.browserAction.setTitle({title: ""})
                 chrome.browserAction.setBadgeBackgroundColor({color: "#7cd68a"})
-                chrome.browserAction.setBadgeText({text: broadcastTimer.duration.minutes.toString()})
+
+                let settings = await Settings.createFromStorageData()
+                let badgeText
+                if (settings.breaksIsACountdown) {
+                    badgeText = (settings.breaksEvery - broadcastTimer.duration.minutes).toString()
+                } else {
+                    badgeText = broadcastTimer.duration.minutes.toString()
+                }
+
+                chrome.browserAction.setBadgeText({text: badgeText})
                 break
             case TimerStates.Paused:
                 chrome.browserAction.setBadgeBackgroundColor({color: "#d1d1d1"})

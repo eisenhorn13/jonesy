@@ -9,26 +9,36 @@ class Settings {
          * @type {boolean}
          */
         this.breaksEnable = options.breaksEnable
+
         /**
          *
          * @type {number}
          */
         this.breaksEvery = options.breaksEvery
+
         /**
          *
          * @type {boolean}
          */
         this.breaksNotify = options.breaksNotify
+
         /**
          *
          * @type {boolean}
          */
         this.breaksSound = options.breaksSound
+
         /**
          *
          * @type {boolean}
          */
         this.breaksPausesTimer = options.breaksPausesTimer
+
+        /**
+         *
+         * @type {boolean}
+         */
+        this.breaksIsACountdown = options.breaksIsACountdown
     }
 
     /**
@@ -42,7 +52,8 @@ class Settings {
                 breaksEvery: 1,
                 breaksNotify: true,
                 breaksSound: true,
-                breaksPausesTimer: false
+                breaksPausesTimer: false,
+                breaksIsACountdown: false
             }, (items) => {
                 resolve(new this(items))
             })
@@ -60,7 +71,8 @@ class Settings {
                 breaksEvery: this.breaksEvery,
                 breaksNotify: this.breaksNotify,
                 breaksSound: this.breaksSound,
-                breaksPausesTimer: this.breaksPausesTimer
+                breaksPausesTimer: this.breaksPausesTimer,
+                breaksIsACountdown: this.breaksIsACountdown
             }, function () {
                 if (chrome.runtime.lastError) {
                     console.error(chrome.runtime.lastError.message)

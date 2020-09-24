@@ -7,7 +7,7 @@ body {
     margin: 0 auto;
 }
 
-h1 {
+h1, h3 {
     border-bottom: solid 1px grey;
     font-weight: 400;
 }
@@ -43,7 +43,7 @@ button {
     cursor: pointer;
 }
 
-#breaksEvery {
+input[type=number] {
     width: 40px
 }
 
