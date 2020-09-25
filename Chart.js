@@ -19,6 +19,14 @@ export default class Chart {
         this.canvas.height = this.height * window.devicePixelRatio
 
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        const darkMode = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+        this.colors = {
+            days: (darkMode) ? "#fff" : "#000",
+            currentDay: '#ff0000',
+            dailyRow: (darkMode) ? "#a0a0a0" : "#403131",
+        }
     }
 
     /**
@@ -49,7 +57,7 @@ export default class Chart {
 
         let currentX = 0
         dailyTotal.forEach((seconds, day) => {
-            const color = (day + 1 === date.getDate()) ? "#ff0000" : "#000"
+            const color = (day + 1 === date.getDate()) ? this.colors.currentDay : this.colors.days
             this.text(
                 (day + 1).toString(),
                 currentX + (cellWidth / 2),
@@ -63,7 +71,7 @@ export default class Chart {
                 this.height - 20 - height,
                 cellWidth - cellPadding,
                 height,
-                "#403131"
+                this.colors.dailyRow
             )
 
             currentX += cellWidth

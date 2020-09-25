@@ -63,6 +63,16 @@ export default class Statistics {
         return JSON.stringify(data)
     }
 
+    toCSV() {
+        let csv = "data:text/csv;charset=utf-8,"
+
+        this.toJSON().forEach((row) => {
+            csv += row.join(",") + "\r\n"
+        })
+
+        return csv
+    }
+
     /**
      *
      * @return {Promise<boolean>}

@@ -67,3 +67,10 @@ label {
 #importStatistics {
     display: none;
 }
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: rgb(53, 54, 58);
+        color: #fff;
+    }
+}
