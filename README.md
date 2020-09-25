@@ -6,9 +6,11 @@ In the basic configuration, it is the simplest timer that is not linked to any t
 
 ## Features
 - Start/Stop timer from toolbar icon, menu or use fast shortcut ⌘⇧P
+- Minutes showed in badge in the toolbar menu
 - Add customizable notifications (breaks)
 - Use a timer as a countdown
 - Every timer stored on local storage
 - You can import or export statistics data as JSON
+- Dark mode support
 
 ![Preview](https://github.com/eisenhorn13/jonesy/raw/master/preview.png)
