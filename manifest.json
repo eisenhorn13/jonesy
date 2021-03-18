@@ -1,7 +1,8 @@
 {
+  "manifest_version": 2,
   "name": "Jonesy timer",
   "version": "1.0",
-  "description": "Simple timer extension for Google Chrome",
+  "description": "Simple timer extension",
   "permissions": [
     "storage",
     "contextMenus",
@@ -9,15 +10,14 @@
     "unlimitedStorage"
   ],
   "browser_action": {},
-  "options_page": "options.html",
+  "options_page": "src/options/options.html",
   "background": {
-    "page": "background.html"
+    "page": "src/background/background.html"
   },
-  "manifest_version": 2,
   "icons": {
-    "16": "assets/images/clock-16x16.png",
-    "48": "assets/images/clock-48x48.png",
-    "128": "assets/images/clock-128x128.png"
+    "16": "src/assets/images/clock-16x16.png",
+    "48": "src/assets/images/clock-48x48.png",
+    "128": "src/assets/images/clock-128x128.png"
   },
   "commands": {
     "toggle-timer": {

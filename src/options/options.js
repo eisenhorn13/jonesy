@@ -1,6 +1,6 @@
-import Statistics from "./Statistics.js"
-import Settings from "./Settings.js"
-import Chart from "./Chart.js";
+import Statistics from "../Statistics.js"
+import Settings from "../Settings.js"
+import Chart from "../Chart.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     const settings = await Settings.createFromStorageData()

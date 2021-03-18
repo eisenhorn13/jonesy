@@ -1,6 +1,6 @@
-import {Timer, TimerStates} from "./Timer.js"
-import Statistics from "./Statistics.js"
-import Settings from "./Settings.js"
+import {Timer, TimerStates} from "../Timer.js"
+import Statistics from "../Statistics.js"
+import Settings from "../Settings.js"
 
 async function run() {
     let timer = new Timer()
